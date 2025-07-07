@@ -1,7 +1,7 @@
-import {useParams} from "react-router-dom";
-import {generateClient} from "aws-amplify/api";
-import type {Schema} from "../amplify/data/resource.ts"; // Припустимо, цей шлях правильний
-import React, {useEffect, useState, FormEvent} from "react";
+import { useParams } from "react-router-dom";
+import { generateClient } from "aws-amplify/api";
+import type { Schema } from "../amplify/data/resource.ts"; // Припустимо, цей шлях правильний
+import React, { useEffect, useState, FormEvent } from "react";
 import {
     Container,
     Typography,
@@ -14,15 +14,15 @@ import {
     ListItemText,
     Paper,
     Box,
-    Divider, DialogTitle, DialogContent, Grid,  DialogActions, Dialog, LinearProgress,
+    Divider, DialogTitle, DialogContent, Grid, DialogActions, Dialog, LinearProgress,
 } from "@mui/material";
-import {formatDistanceToNowStrict} from 'date-fns';
-import {uk} from 'date-fns/locale';
+import { formatDistanceToNowStrict } from 'date-fns';
+import { uk } from 'date-fns/locale';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 // Генерація клієнта Amplify API
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'identityPool' });
 
 // Допоміжна функція для форматування відносного часу (як у месенджерах)
 const formatRelativeTime = (dateString: string | undefined | null): string => {
@@ -37,7 +37,7 @@ const formatRelativeTime = (dateString: string | undefined | null): string => {
             console.warn("Спроба форматувати некоректну дату:", dateString);
             return "Некоректна дата";
         }
-        return formatDistanceToNowStrict(date, {addSuffix: true, locale: uk});
+        return formatDistanceToNowStrict(date, { addSuffix: true, locale: uk });
     } catch (e) {
         console.error("Помилка форматування дати:", dateString, e);
         return "Помилка дати";
@@ -45,7 +45,7 @@ const formatRelativeTime = (dateString: string | undefined | null): string => {
 };
 
 function Room() {
-    const {id} = useParams<{ id: string }>(); // Отримуємо ID кімнати з URL
+    const { id } = useParams<{ id: string }>(); // Отримуємо ID кімнати з URL
     const [room, setRoom] = useState<Schema["Room"]["type"] | null>(null);
     const [loading, setLoading] = useState<boolean>(true); // Стан завантаження даних кімнати
     const [loadingGenerate, setLoadingGenerate] = useState<boolean>(false); // Стан завантаження даних кімнати
@@ -83,7 +83,7 @@ function Room() {
         setRoomExists(true); // Припускаємо, що кімната існує до відповіді від сервера
 
         try {
-            const {data, errors} = await client.models.Room.get({id});
+            const { data, errors } = await client.models.Room.get({ id });
 
             if (errors) {
                 console.error("Помилка завантаження кімнати:", errors);
@@ -127,7 +127,7 @@ function Room() {
         setLoading(true);
         setError(null);
         try {
-            const {data, errors} = await client.models.EventType.list({});
+            const { data, errors } = await client.models.EventType.list({});
             if (errors) {
                 console.error("Помилка завантаження типів:", errors);
                 setError(`Помилка завантаження: ${errors[0].message}`);
@@ -167,7 +167,7 @@ function Room() {
             // Amplify DataStore v6 може не підтримувати sort напряму в observeQuery.
             // Сортування на клієнті після отримання даних надійніше.
         }).subscribe({
-            next: ({items}) => {
+            next: ({ items }) => {
                 // Сортуємо події: найновіші спочатку (за полем createdAt)
                 const sortedEvents = [...items].sort((a, b) => {
                     const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -224,9 +224,9 @@ function Room() {
     // Рендеринг стану завантаження кімнати
     if (loading) {
         return (
-            <Container sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
-                <CircularProgress/>
-                <Typography variant="h6" sx={{mt: 2}}>Завантаження даних кімнати...</Typography>
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress />
+                <Typography variant="h6" sx={{ mt: 2 }}>Завантаження даних кімнати...</Typography>
             </Container>
         );
     }
@@ -234,7 +234,7 @@ function Room() {
     // Рендеринг, якщо виникла загальна помилка
     if (error) {
         return (
-            <Container sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                 <Alert severity="error">{error}</Alert>
             </Container>
         );
@@ -243,7 +243,7 @@ function Room() {
     // Рендеринг, якщо ID кімнати не надано в URL
     if (!id) {
         return (
-            <Container sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                 <Alert severity="warning">ID кімнати не вказано в адресі.</Alert>
             </Container>
         );
@@ -252,7 +252,7 @@ function Room() {
     // Рендеринг, якщо кімнату не знайдено після запиту
     if (!roomExists) {
         return (
-            <Container sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                 <Alert severity="warning">Кімнату з ID: "{id}" не знайдено.</Alert>
             </Container>
         );
@@ -260,7 +260,7 @@ function Room() {
 
     if (room && !room.open) {
         return (
-            <Container sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                 <Alert severity="warning">Ця кімната закрита.</Alert>
             </Container>
         );
@@ -269,15 +269,15 @@ function Room() {
     // Рендеринг запиту пароля, якщо кімната завантажена, має пароль і він ще не верифікований
     if (room && room.password && !isPasswordVerified) {
         return (
-            <Container maxWidth="sm" sx={{mt: 5}}>
-                <Paper elevation={3} sx={{p: {xs: 2, sm: 4}, borderRadius: 2}}>
-                    <Typography variant="h5" component="h1" gutterBottom sx={{textAlign: 'center'}}>
+            <Container maxWidth="sm" sx={{ mt: 5 }}>
+                <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 2 }}>
+                    <Typography variant="h5" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
                         Доступ до кімнати
                     </Typography>
-                    <Typography sx={{textAlign: 'center', color: 'text.secondary'}}>
+                    <Typography sx={{ textAlign: 'center', color: 'text.secondary' }}>
                         Ця кімната захищена паролем. Будь ласка, введіть пароль для продовження.
                     </Typography>
-                    <Box component="form" onSubmit={handlePasswordSubmit} noValidate sx={{mt: 1}}>
+                    <Box component="form" onSubmit={handlePasswordSubmit} noValidate sx={{ mt: 1 }}>
                         <TextField
                             margin="normal"
                             required
@@ -297,7 +297,7 @@ function Room() {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{mt: 3, mb: 2}}
+                            sx={{ mt: 3, mb: 2 }}
                         >
                             Увійти
                         </Button>
@@ -315,11 +315,15 @@ function Room() {
             'This mission should be significant enough to affect the entire game world or a significant part of it, ' +
             'and represent a long-term goal that requires many adventures and decisions. Generate in Ukrainian. ' +
             'The result should be only the text of the mission title, nothing more. Without unnecessary characters. ' +
-            'Add creativity and a bit of absurdity. Don\'t write standard goals.';
+            'Add creativity and dont write standard goals.';
 
+        console.log(originPrompt + ' World: ' + room.promptWorld + ' Rules: ' + room.promptRules)
         try {
-            const {data, errors} = await client.queries.Generate({
-                originPrompt: originPrompt,
+            const { data, errors } = await client.queries.Generate({
+                originPrompt: originPrompt + ' World: ' + room.promptWorld + ' Rules: ' + room.promptRules,
+                model: room.model || null,
+                systemPrompt: room.promptSystem || '',
+                temperature: room.temperature || 1
             });
 
             console.log(data, errors)
@@ -349,7 +353,7 @@ function Room() {
 
             console.log(parsedData.data)
 
-            const {data: updatedData, errors: updateErrors} = await client.models.Room.update({
+            const { data: updatedData, errors: updateErrors } = await client.models.Room.update({
                 id: room.id,
                 mission: parsedData.data ?? "",
             });
@@ -360,7 +364,7 @@ function Room() {
                 setError("Помилка оновлення: не отримано дані.");
             }
 
-            setRoom({...room, mission: parsedData.data});
+            setRoom({ ...room, mission: parsedData.data });
 
         } catch (error) {
             console.error('Error generating mission:', error);
@@ -371,17 +375,19 @@ function Room() {
     const handleGenerate = async (type: Schema["EventType"]["type"] | null) => {
         if (!room || !room.id || !type) return;
 
-        const originPrompt = type.textPrompt;
+        const originPrompt = type.textPrompt + ' World: ' + room.promptWorld + ' Rules: ' + room.promptRules;
+
+        console.log(originPrompt);
 
         setLoadingGenerate(true);
 
         try {
-            const {data, errors} = await client.queries.Generate({
-                originPrompt: originPrompt + "Don't write in a standard way, add creativity and a pinch of absurdity. " +
-                    "Write your answer in Ukrainian. " +
-                    "Use up to 50 words. " +
-                    "The result should be only the text of the answer, nothing more.",
+            const { data, errors } = await client.queries.Generate({
+                originPrompt: originPrompt,
                 model: room.model || null,
+                systemPrompt: room.promptSystem || '',
+                temperature: room.temperature || 1
+
             });
 
             console.log(data, errors)
@@ -411,7 +417,7 @@ function Room() {
 
             console.log(parsedData.data)
 
-            const {data: updatedData, errors: updateErrors} = await client.models.RoomEvent.create({
+            const { data: updatedData, errors: updateErrors } = await client.models.RoomEvent.create({
                 event: parsedData.data,
                 roomId: room.id,
                 typeId: type.id
@@ -446,36 +452,36 @@ function Room() {
     if (room && isPasswordVerified) {
         return (
             <>
-                <Container maxWidth="md" sx={{mt: 4, mb: 4}}>
-                    <Paper elevation={2} sx={{p: {xs: 2, md: 3}, borderRadius: 2}}>
+                <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+                    <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, borderRadius: 2 }}>
                         <Typography variant="h6" component="h1" gutterBottom
-                                    sx={{textAlign: 'center', mb: 3, fontWeight: 'medium'}}>
+                            sx={{ textAlign: 'center', mb: 3, fontWeight: 'medium' }}>
                             Головна мета: {room.mission ? `"${room.mission}"` : <Button
-                            variant={'contained'}
-                            startIcon={<AutoAwesomeIcon/>}
-                            aria-label="edit"
-                            onClick={() => handleGenerateMission()}
-                            disabled={loading}
-                            color="primary"
-                        >
-                            Визначити
-                        </Button>}
+                                variant={'contained'}
+                                startIcon={<AutoAwesomeIcon />}
+                                aria-label="edit"
+                                onClick={() => handleGenerateMission()}
+                                disabled={loading}
+                                color="primary"
+                            >
+                                Визначити
+                            </Button>}
                         </Typography>
 
-                        <Divider sx={{my: 1}}/>
+                        <Divider sx={{ my: 1 }} />
                         <Button
                             variant={'contained'}
-                            startIcon={<AutoFixHighIcon/>}
+                            startIcon={<AutoFixHighIcon />}
                             aria-label="edit"
                             onClick={() => handleOpenGenerateDialog()}
                             disabled={loading}
                             fullWidth
                             color="primary"
-                            sx={{p: 2}}
+                            sx={{ p: 2 }}
                         >
                             Нова подія
                         </Button>
-                        <Divider sx={{my: 1}}/>
+                        <Divider sx={{ my: 1 }} />
 
                         {events.length > 0 && (
                             <Box sx={{ mb: 4 }}> {/* Додаємо відступ знизу */}
@@ -483,12 +489,12 @@ function Room() {
                                     Поточна подія:
                                 </Typography>
                                 <Grid container spacing={2}>
-                                    <Grid size={{xs: 12}}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Typography variant="body1" component="p" sx={{ fontWeight: 'bold' }}> {/* Жирний текст для значення */}
                                             {types.find(type => type.id === events[0]?.typeId)?.title || 'Невідомий тип'} {/* Змінив 'error' на більш інформативний текст */}
                                         </Typography>
                                     </Grid>
-                                    <Grid size={{xs: 12}} sx={{width: '100%', bgcolor: 'background.paper', p: 3}}>
+                                    <Grid size={{ xs: 12 }} sx={{ width: '100%', bgcolor: 'background.paper', p: 3 }}>
                                         <Typography variant="h5" component="p" sx={{ fontWeight: 'bold' }}>
                                             {events[0].event}
                                         </Typography>
@@ -501,7 +507,7 @@ function Room() {
                             Історія подій:
                         </Typography>
                         {events.length > 0 ? (
-                            <List sx={{ width: '100%'}}>
+                            <List sx={{ width: '100%' }}>
                                 {events.slice(1).map((eventItem: Schema["RoomEvent"]["type"]) => { // Явно вказуємо тип для eventItem
                                     const isExpanded: boolean = expandedItems[eventItem.id]; // Явно вказуємо тип для isExpanded
 
@@ -559,7 +565,7 @@ function Room() {
                                 })}
                             </List>
                         ) : (
-                            <Typography sx={{mt: 2, textAlign: 'center', color: 'text.secondary'}}>
+                            <Typography sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
                                 Подій у цій кімнаті ще не відбулося.
                             </Typography>
                         )}
@@ -569,8 +575,8 @@ function Room() {
                 <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="sm">
                     <DialogTitle>{loadingGenerate ? 'Зачекайте...' : 'Оберіть тип'}</DialogTitle>
                     <DialogContent>
-                        {loadingGenerate ? <LinearProgress/> :
-                            <Grid container spacing={2} sx={{mt: 1}}>
+                        {loadingGenerate ? <LinearProgress /> :
+                            <Grid container spacing={2} sx={{ mt: 1 }}>
 
                                 {randomTypes.map((type: Schema["EventType"]["type"]) => (
                                     <Grid key={type.id}>
@@ -580,7 +586,7 @@ function Room() {
                                             variant="contained"
                                             color="primary"
                                             disabled={loading}
-                                            sx={{p: 3}}
+                                            sx={{ p: 3 }}
                                         >
                                             {type.title}
                                         </Button>
@@ -590,7 +596,7 @@ function Room() {
                             </Grid>}
 
                     </DialogContent>
-                    <DialogActions sx={{pb: 2, pr: 2}}>
+                    <DialogActions sx={{ pb: 2, pr: 2 }}>
                         <Button onClick={() => setIsDialogOpen(false)} color="secondary" disabled={loading}>
                             Скасувати
                         </Button>
@@ -603,7 +609,7 @@ function Room() {
 
     // Запасний рендеринг, якщо жодна з умов не виконана (малоймовірно)
     return (
-        <Container sx={{mt: 4}}>
+        <Container sx={{ mt: 4 }}>
             <Alert severity="info">Завантаження інформації про кімнату або непередбачений стан.</Alert>
         </Container>
     );

@@ -1,6 +1,6 @@
-import {generateClient} from "aws-amplify/api";
-import type {Schema} from "../amplify/data/resource.ts";
-import React, {useEffect, useState} from "react";
+import { generateClient } from "aws-amplify/api";
+import type { Schema } from "../amplify/data/resource.ts";
+import React, { useEffect, useState } from "react";
 import {
     Button,
     TextField,
@@ -24,7 +24,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from '@mui/icons-material/Add';
 
 // Генерація клієнта Amplify API
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'identityPool' });
 
 // Тип для стану редагованої кімнати, може бути частковим під час створення
 type EditableEventTypeData = Partial<Schema["EventType"]["type"]> & { id?: string };
@@ -40,7 +40,7 @@ function EventPanel() {
         setLoading(true);
         setError(null);
         try {
-            const {data, errors} = await client.models.EventType.list({});
+            const { data, errors } = await client.models.EventType.list({});
             if (errors) {
                 console.error("Помилка завантаження промптів:", errors);
                 setError(`Помилка завантаження: ${errors[0].message}`);
@@ -71,7 +71,7 @@ function EventPanel() {
 
     // Обробник для відкриття діалогу редагування існуючої кімнати
     const handleOpenEditDialog = (eventType: Schema["EventType"]["type"]) => {
-        setCurrentEventType({...eventType}); // Копіюємо дані кімнати для редагування
+        setCurrentEventType({ ...eventType }); // Копіюємо дані кімнати для редагування
         setIsDialogOpen(true);
     };
 
@@ -82,8 +82,8 @@ function EventPanel() {
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!currentEventType) return;
-        const {name, value} = event.target;
-        setCurrentEventType(prev => ({...prev!, [name]: value}));
+        const { name, value } = event.target;
+        setCurrentEventType(prev => ({ ...prev!, [name]: value }));
     };
 
     const handleSaveEventType = async () => {
@@ -96,7 +96,7 @@ function EventPanel() {
 
         try {
             if (currentEventType.id) {
-                const {data, errors} = await client.models.EventType.update({
+                const { data, errors } = await client.models.EventType.update({
                     id: currentEventType.id,
                     title: currentEventType.title ?? "",
                     textPrompt: currentEventType.textPrompt ?? "",
@@ -112,7 +112,7 @@ function EventPanel() {
                     title: currentEventType.title ?? "",
                     textPrompt: currentEventType.textPrompt ?? "",
                 };
-                const {data, errors} = await client.models.EventType.create(eventToCreate);
+                const { data, errors } = await client.models.EventType.create(eventToCreate);
                 if (errors) {
                     console.error("Помилка створення кімнати:", errors);
                     setError(`Помилка створення: ${errors[0].message}`);
@@ -138,7 +138,7 @@ function EventPanel() {
         setLoading(true);
         setError(null);
         try {
-            const {errors} = await client.models.EventType.delete({id});
+            const { errors } = await client.models.EventType.delete({ id });
             if (errors) {
                 console.error("Помилка видалення типу:", errors);
                 setError(`Помилка видалення: ${errors[0].message}`);
@@ -153,16 +153,16 @@ function EventPanel() {
     };
 
     return (
-        <Container maxWidth="md" sx={{mt: 4, mb: 4}}>
-            <Paper elevation={3} sx={{p: 3}}>
-                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2}}>
+        <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+            <Paper elevation={3} sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h4" component="h1">
                         Типи подій
                     </Typography>
                     <Button
                         variant="contained"
                         color="primary"
-                        startIcon={<AddIcon/>}
+                        startIcon={<AddIcon />}
                         onClick={handleOpenCreateDialog}
                         disabled={loading}
                     >
@@ -170,16 +170,16 @@ function EventPanel() {
                     </Button>
                 </Box>
 
-                {error && <Alert severity="error" sx={{mb: 2}}>{error}</Alert>}
+                {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
                 {loading && !eventType.length && ( // Показуємо завантажувач, якщо дані завантажуються і кімнат ще немає
-                    <Box sx={{display: 'flex', justifyContent: 'center', my: 3}}>
-                        <CircularProgress/>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+                        <CircularProgress />
                     </Box>
                 )}
 
                 {!loading && !eventType.length && ( // Якщо завантаження завершено, але кімнат немає
-                    <Typography variant="subtitle1" sx={{textAlign: 'center', my: 3}}>
+                    <Typography variant="subtitle1" sx={{ textAlign: 'center', my: 3 }}>
                         Немає типів для відображення. Спробуйте додати.
                     </Typography>
                 )}
@@ -203,23 +203,23 @@ function EventPanel() {
                                     <Box display="flex" justifyContent="flex-end" mt={2}>
                                         <Button
                                             variant={'contained'}
-                                            startIcon={<EditIcon/>}
+                                            startIcon={<EditIcon />}
                                             aria-label="edit"
                                             onClick={() => handleOpenEditDialog(eventType)}
                                             disabled={loading}
                                             color="primary"
-                                            sx={{mr: 1}}
+                                            sx={{ mr: 1 }}
                                         >
                                             Редагувати
                                         </Button>
                                         <Button
                                             variant={'contained'}
-                                            startIcon={<DeleteIcon/>}
+                                            startIcon={<DeleteIcon />}
                                             aria-label="delete"
                                             onClick={() => deleteEventType(eventType.id)}
                                             disabled={loading}
                                             color="error"
-                                            sx={{ml: 1}}
+                                            sx={{ ml: 1 }}
                                         >
                                             Видалити
                                         </Button>
@@ -236,8 +236,8 @@ function EventPanel() {
                 <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="sm">
                     <DialogTitle>{currentEventType.id ? "Редагувати тип" : "Створити тип"}</DialogTitle>
                     <DialogContent>
-                        <Grid container spacing={2} sx={{mt: 1}}>
-                            <Grid size={{xs: 12}}>
+                        <Grid container spacing={2} sx={{ mt: 1 }}>
+                            <Grid size={{ xs: 12 }}>
                                 <TextField
                                     autoFocus
                                     margin="dense"
@@ -250,7 +250,7 @@ function EventPanel() {
                                     disabled={loading}
                                 />
                             </Grid>
-                            <Grid size={{xs: 12}}>
+                            <Grid size={{ xs: 12 }}>
                                 <TextField
                                     margin="dense"
                                     name="textPrompt"
@@ -265,13 +265,13 @@ function EventPanel() {
                             </Grid>
                         </Grid>
                     </DialogContent>
-                    <DialogActions sx={{pb: 2, pr: 2}}>
+                    <DialogActions sx={{ pb: 2, pr: 2 }}>
                         <Button onClick={handleCloseDialog} color="secondary" disabled={loading}>
                             Скасувати
                         </Button>
                         <Button onClick={handleSaveEventType} variant="contained" color="primary" disabled={loading}>
                             {loading ? <CircularProgress size={24}
-                                                         color="inherit"/> : (currentEventType.id ? "Зберегти зміни" : "Створити")}
+                                color="inherit" /> : (currentEventType.id ? "Зберегти зміни" : "Створити")}
                         </Button>
                     </DialogActions>
                 </Dialog>
